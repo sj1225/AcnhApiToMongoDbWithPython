@@ -1,7 +1,5 @@
 ## ACNH API To MongoDB With Python!
 
----
-
 * Date : 2022.12.14
 * Author : m1ngmy0ng ( suuujin1225@gmail.com, https://github.com/sj1225 )
 
