@@ -22,56 +22,84 @@ MONGODB_DBNM = settings.MONGODB_DBNM
 
 client = pymongo.MongoClient(MONGODB_URL)   # Mongo db url
 db = client[MONGODB_DBNM]                   # Database name
-
-# Json reading test
-#fish_list_json = requests.get(FISH_LIST_URL)
-#fish_list_txt = fish_list_json.text
-#fish_list_data = json.loads(fish_list_txt)
-
-#print(fish_list_data['oarfish']) # Fish name must be entered to output results (Inefficient)
-
-db["fish_list"].delete_many({}) # Collection clear
-
-i = 1
-while 1:
-    try:
-        fish_list_json = requests.get(FISH_LIST_URL + str(i))
-        fish_list_txt = fish_list_json.text
-        fish_list_data = json.loads(fish_list_txt)
-    
-    except:
-        print("Exception!!!")
-        break
-
-    else :
-        print(str(i) + " " + fish_list_data['file-name'])
-        db["fish_list"].insert_one({"id":fish_list_data['file-name']
-                                  , "name":fish_list_data['name']['name-KRko']
-                                  , "location":fish_list_data['availability']['location']
-                                    })
-
-        i = i + 1
-
-# Read Mongo DB Data
-#for x in db.fish_list.find() :
-#    print(x)
-#    break
-
-client.close()
-
+############################################
+######################################################
 # Name: convLocation
 # Desc: Location Data Convert Function
-# Para: Location Data ( River, Sea, etc.)
-# Return: Location Code ( River -> 0, Sea -> 1, etc.)
+# Para: Location Data ( Pier, Pond, etc.)
+# Return: Location Code ( Pier -> 0, Pond -> 1, etc.)
 def convLocation(loca):
     result = ""
-    if loca == "River" :
+
+    if loca == "Pier":
         result = "0"
     
-    if loca == "Sea" :
+    elif loca == "Pond":
         result = "1"
     
+    elif loca == "River":
+        result = "2"
+    
+    elif loca == "River (Clifftop)":
+        result = "3"
+    
+    elif loca == "River (Mouth)":
+        result = "4"
+    
+    elif loca == "Sea":
+        result = "5"
+    
+    elif loca == "Sea (when raining or snowing)":
+        result = "6"
+
+    elif loca == "River (Clifftop) & Pond":
+        result = "7"
+
     else :
-        result = "*"
+        result = loca
 
     return result
+
+############################################
+
+def main():
+    # Json reading test
+    #fish_list_json = requests.get(FISH_LIST_URL)
+    #fish_list_txt = fish_list_json.text
+    #fish_list_data = json.loads(fish_list_txt)
+
+    #print(fish_list_data['oarfish']) # Fish name must be entered to output results (Inefficient)
+
+    db["fish_list"].delete_many({}) # Collection clear
+
+    i = 1
+    while 1:
+        try:
+            fish_list_json = requests.get(FISH_LIST_URL + str(i))
+            fish_list_txt = fish_list_json.text
+            fish_list_data = json.loads(fish_list_txt)
+        
+        except:
+            print("Exception!!!")
+            break
+
+        else :
+            print(str(i) + " " + fish_list_data['file-name'])
+            db["fish_list"].insert_one({"id":fish_list_data['file-name']
+                                    , "name":fish_list_data['name']['name-KRko']
+                                    , "location": convLocation(fish_list_data['availability']['location'])
+                                        })
+            
+            i = i + 1
+
+
+    # Read Mongo DB Data
+    #for x in db.fish_list.find() :
+    #    print(x)
+    #    break
+
+    client.close()
+
+if __name__ == "__main__":
+    main()
+
